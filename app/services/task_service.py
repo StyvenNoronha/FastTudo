@@ -2,7 +2,7 @@ from uuid import UUID
 from models.user_models import User
 from models.task_model import Task
 from typing import List
-from schemas.task_schema import TaskCreate
+from schemas.task_schema import TaskCreate, TaskUpdate
 
 class TaskService:
     @staticmethod
@@ -20,3 +20,22 @@ class TaskService:
     async def detail(user: User, task_id: UUID):
         task = await Task.find_one(Task.task_id == task_id, Task.owner.id == user.id)
         return task    
+    
+
+    @staticmethod
+    async def update_task(user: User, task_id: UUID, data: TaskUpdate):
+        task = await TaskService.detail(user, task_id)
+        await task.update({
+            '$set': data.dict(
+                exclude_unset=True
+            )
+        })
+        await task.save()
+        return task
+    
+    @staticmethod
+    async def delete_task(user: User, task_id: UUID) -> None:
+        task = await TaskService.detail(user, task_id)
+        if task:
+            await task.delete()
+        return None    

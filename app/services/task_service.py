@@ -1,3 +1,4 @@
+from uuid import UUID
 from models.user_models import User
 from models.task_model import Task
 from typing import List
@@ -13,3 +14,9 @@ class TaskService:
     async def create_task(user: User, data: TaskCreate) -> Task:
         task = Task(**data.dict(), owner=user)
         return await task.insert()
+    
+
+    @staticmethod
+    async def detail(user: User, task_id: UUID):
+        task = await Task.find_one(Task.task_id == task_id, Task.owner.id == user.id)
+        return task    
